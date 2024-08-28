@@ -1,0 +1,1 @@
+Ich habe mir das GitBug Projekt von wingertge https://github.com/wingertge/ambientika-py/ genommen und daraus das INIT Script zur Steuerung meiner Ambientika Smart Geräte verwendet. Zur Steuerung aus IOBROKER steuere ich dort mittels JAVASCRIPT die Python Scripte an, um die Lüfter in verschiedene Zustände zu versetzen.
