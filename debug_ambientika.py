@@ -2,7 +2,7 @@ import asyncio
 import os
 import aiohttp
 
-# Zugangsdaten aus externer Datei `config.py` importieren
+# Zugangsdaten aus `config.py` importieren
 try:
     from config import USERNAME, PASSWORD
     print("✅ Zugangsdaten erfolgreich aus config.py geladen!")
@@ -10,7 +10,7 @@ except ImportError as e:
     print(f"❌ Fehler: config.py konnte nicht geladen werden! {e}")
     exit(1)
 
-# Prüfen, ob init.py existiert
+# Prüfen, ob `init.py` existiert
 init_path = "init.py"
 if not os.path.exists(init_path):
     print(f"❌ Fehler: Die Datei {init_path} wurde nicht gefunden!")
@@ -36,11 +36,8 @@ async def main():
 
     print("🔍 Debug: Inhalt von `ambientika`:", repr(ambientika))  
 
-    # ✅ `ambientika` ist bereits ein `Ambientika`-Objekt, keine `unwrap()` nötig!
     if isinstance(ambientika, Ambientika):
         print("✅ `ambientika` ist ein gültiges `Ambientika`-Objekt!")
-
-        # Zeige ALLE Attribute des `Ambientika`-Objekts
         print("🔍 Attribute von `ambientika`: ", dir(ambientika))
 
         if hasattr(ambientika, "api"):
@@ -54,6 +51,17 @@ async def main():
             except Exception as e:
                 print(f"❌ Fehler beim Abruf der Häuser: {e}")
 
+            # Abruf der vollständigen Hausinformationen INNERHALB von `main()`
+            if hasattr(ambientika, "house_complete_info"):
+                print(f"📡 Abruf der vollständigen Informationen für Haus-ID 11301...")
+                try:
+                    house_info = await ambientika.house_complete_info(11301)
+                    print("🔍 Vollständige Hausinformationen:", house_info)
+                except Exception as e:
+                    print(f"❌ Fehler beim Abruf der vollständigen Hausinformationen: {e}")
+            else:
+                print("❌ `house_complete_info` ist nicht verfügbar!")
+
         else:
             print("❌ `ambientika` hat keine `api`-Instanz!")
 
@@ -61,14 +69,4 @@ async def main():
         print("❌ `ambientika` ist kein `Ambientika`-Objekt! Tatsächlicher Typ:", type(ambientika))
 
 if __name__ == "__main__":
-    asyncio.run(main())
-    
-    # Abruf der vollständigen Hausinformationen
-if hasattr(ambientika, "house_complete_info"):
-    print(f"📡 Abruf der vollständigen Informationen für Haus-ID {11301}...")
-
-    house_info = await ambientika.house_complete_info(11301)
-
-    print("🔍 Vollständige Hausinformationen:", house_info)
-else:
-    print("❌ `house_complete_info` ist nicht verfügbar!")
+    asyncio.run(main())  # ALLES muss innerhalb dieser Funktion passieren!
