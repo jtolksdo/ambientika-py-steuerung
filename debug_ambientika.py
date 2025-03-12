@@ -62,3 +62,13 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+    
+    # Abruf der vollständigen Hausinformationen
+if hasattr(ambientika, "house_complete_info"):
+    print(f"📡 Abruf der vollständigen Informationen für Haus-ID {11301}...")
+
+    house_info = await ambientika.house_complete_info(11301)
+
+    print("🔍 Vollständige Hausinformationen:", house_info)
+else:
+    print("❌ `house_complete_info` ist nicht verfügbar!")

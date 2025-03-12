@@ -1,31 +1,49 @@
 import asyncio
 from init import authenticate
 
-# Deine Zugangsdaten
-username = 'AMBIENTIKA_USERNAME_EMAIL_HIER_HIN'
-password = 'DEINPASSWORT'
+# Zugangsdaten aus `config.py` importieren
+try:
+    from config import USERNAME, PASSWORD
+except ImportError:
+    print("❌ Fehler: config.py konnte nicht geladen werden!")
+    exit(1)
 
 async def main():
-    # Authentifiziere dich bei der Ambientika-API
-    ambientika = await authenticate(username, password)
+    print("🔄 Starte Authentifizierung...")
+
+    # Authentifizierung
+    ambientika = await authenticate(USERNAME, PASSWORD)
     if not ambientika:
-        print("Fehler bei der Authentifizierung")
+        print("❌ Fehler bei der Authentifizierung")
         return
 
-    # Informationen über alle Häuser abrufen
+    print("✅ Authentifizierung erfolgreich!")
+
+    # Abruf der Häuser
     houses = await ambientika.houses()
     if not houses:
-        print("Keine Häuser gefunden")
+        print("❌ Keine Häuser gefunden")
         return
 
-    # Informationen über die Geräte in allen Häusern abrufen
-    for house in houses:
-        print(f"Haus: {house.name}, Adresse: {house.address}")
-        for room in house.rooms:
-            print(f"  Raum: {room.name}")
-            for device in room.devices:
-                print(f"    Gerät: {device.name}, Seriennummer: {device.serial_number}")
+    print(f"🏠 Gefundene Häuser: {len(houses)}")
 
-# Hauptfunktion ausführen
+    # Hole vollständige Hausinformationen
+    for house in houses:
+        print(f"📡 Abruf der vollständigen Infos für Haus '{house.name}'...")
+        house_info = await ambientika.house_complete_info(house.id)
+
+        if not house_info:
+            print(f"⚠️ Keine Daten für Haus '{house.name}' erhalten!")
+            continue
+
+        # Durchsuche Räume und Geräte
+        print(f"🏡 Haus: {house_info.name} (Adresse: {house_info.address})")
+
+        for room in house_info.rooms:
+            print(f"  🏠 Raum: {room.name}")
+
+            for device in room.devices:
+                print(f"    🔌 Gerät: {device.name}, Seriennummer: {device.serial_number}")
+
 if __name__ == "__main__":
     asyncio.run(main())
