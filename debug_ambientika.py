@@ -34,39 +34,52 @@ async def main():
         print(f"❌ Fehler beim Aufruf von authenticate(): {e}")
         return
 
-    print("🔍 Debug: Inhalt von `ambientika`:", repr(ambientika))  
+    print("🔍 Debug: Inhalt von `ambientika`:", repr(ambientika))
 
-    if isinstance(ambientika, Ambientika):
-        print("✅ `ambientika` ist ein gültiges `Ambientika`-Objekt!")
-        print("🔍 Attribute von `ambientika`: ", dir(ambientika))
-
-        if hasattr(ambientika, "api"):
-            print("✅ `ambientika` enthält eine API-Instanz!")
-
-            # Teste eine API-Anfrage
-            print("📡 Abruf der Häuserdaten...")
-            try:
-                raw_response = await ambientika.api.get("house/houses-info")
-                print("🔍 API-Rohantwort:", raw_response)
-            except Exception as e:
-                print(f"❌ Fehler beim Abruf der Häuser: {e}")
-
-            # Abruf der vollständigen Hausinformationen INNERHALB von `main()`
-            if hasattr(ambientika, "house_complete_info"):
-                print(f"📡 Abruf der vollständigen Informationen für Haus-ID 11301...")
-                try:
-                    house_info = await ambientika.house_complete_info(11301)
-                    print("🔍 Vollständige Hausinformationen:", house_info)
-                except Exception as e:
-                    print(f"❌ Fehler beim Abruf der vollständigen Hausinformationen: {e}")
-            else:
-                print("❌ `house_complete_info` ist nicht verfügbar!")
-
-        else:
-            print("❌ `ambientika` hat keine `api`-Instanz!")
-
-    else:
+    if not isinstance(ambientika, Ambientika):
         print("❌ `ambientika` ist kein `Ambientika`-Objekt! Tatsächlicher Typ:", type(ambientika))
+        return
+
+    print("✅ `ambientika` ist ein gültiges `Ambientika`-Objekt!")
+    
+    if not hasattr(ambientika, "api"):
+        print("❌ `ambientika` hat keine `api`-Instanz!")
+        return
+
+    print("✅ `ambientika` enthält eine API-Instanz!")
+
+    # Abruf der Hausübersicht
+    print("📡 Abruf der Häuserdaten...")
+    try:
+        houses = await ambientika.houses()
+        if not houses:
+            print("❌ Keine Häuser gefunden.")
+            return
+        print(f"🏠 Gefundene Häuser: {len(houses)}")
+    except Exception as e:
+        print(f"❌ Fehler beim Abruf der Häuser: {e}")
+        return
+
+    # Durchlaufe ALLE gefundenen Häuser
+    for house in houses:
+        print(f"\n🏡 **Haus:** {house.name} (ID: {house.id})")
+
+        try:
+            house_info = await ambientika.house_complete_info(house.id)
+            if not house_info:
+                print(f"❌ Keine vollständigen Informationen für Haus '{house.name}' erhalten!")
+                continue
+        except Exception as e:
+            print(f"❌ Fehler beim Abruf der vollständigen Hausinformationen für {house.name}: {e}")
+            continue
+
+        # Durchsuche Räume und Geräte
+        for room in house_info.rooms:
+            print(f"  🏠 **Raum:** {room.name}")
+
+            for device in room.devices:
+                print(f"    🔌 **Gerät:** {device.name}")
+                print(f"       📌 **Seriennummer:** {device.serial_number}")
 
 if __name__ == "__main__":
-    asyncio.run(main())  # ALLES muss innerhalb dieser Funktion passieren!
+    asyncio.run(main())
