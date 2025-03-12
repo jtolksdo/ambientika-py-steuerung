@@ -36,33 +36,29 @@ async def main():
 
     print("🔍 Debug: Inhalt von `ambientika`:", repr(ambientika))  
 
-    if hasattr(ambientika, "unwrap"):  # Falls `Success`-Wrapper genutzt wird
-        print("✅ `ambientika` ist ein `Success`-Objekt!")
+    # ✅ `ambientika` ist bereits ein `Ambientika`-Objekt, keine `unwrap()` nötig!
+    if isinstance(ambientika, Ambientika):
+        print("✅ `ambientika` ist ein gültiges `Ambientika`-Objekt!")
 
-        try:
-            actual_ambientika = ambientika.unwrap()  # Extrahiere echtes `Ambientika`-Objekt
-            print("🔍 Extracted `ambientika.unwrap()`: ", repr(actual_ambientika))
+        # Zeige ALLE Attribute des `Ambientika`-Objekts
+        print("🔍 Attribute von `ambientika`: ", dir(ambientika))
 
-            # Zeige ALLE Attribute des `Ambientika`-Objekts
-            print("🔍 Attribute von `ambientika.unwrap()`: ", dir(actual_ambientika))
+        if hasattr(ambientika, "api"):
+            print("✅ `ambientika` enthält eine API-Instanz!")
 
-            if hasattr(actual_ambientika, "api"):
-                print("✅ `ambientika.unwrap()` enthält eine API-Instanz!")
-
-                # Teste eine API-Anfrage
-                print("📡 Abruf der Häuserdaten...")
-                raw_response = await actual_ambientika.api.get("house/houses-info")
+            # Teste eine API-Anfrage
+            print("📡 Abruf der Häuserdaten...")
+            try:
+                raw_response = await ambientika.api.get("house/houses-info")
                 print("🔍 API-Rohantwort:", raw_response)
+            except Exception as e:
+                print(f"❌ Fehler beim Abruf der Häuser: {e}")
 
-            else:
-                print("❌ `ambientika.unwrap()` hat keine `api`-Instanz!")
-
-        except Exception as e:
-            print(f"❌ Fehler beim Extrahieren von `ambientika.unwrap()`: {e}")
+        else:
+            print("❌ `ambientika` hat keine `api`-Instanz!")
 
     else:
-        print("❌ `ambientika` ist kein `Success`-Objekt! Tatsächlicher Typ:", type(ambientika))
-        print("🔍 Rohdaten von `ambientika`:", repr(ambientika))
+        print("❌ `ambientika` ist kein `Ambientika`-Objekt! Tatsächlicher Typ:", type(ambientika))
 
 if __name__ == "__main__":
     asyncio.run(main())
